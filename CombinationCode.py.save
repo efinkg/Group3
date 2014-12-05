@@ -1,0 +1,84 @@
+import time
+import RPi.GPIO as GPIO
+import  multiprocessing
+from multiprocessing import Process
+import motor, button, thermometer, anemometer, led
+tmin = 0
+tmax = 0
+temp_room = 0
+buzzed = 1
+
+def readButton():
+   while 1:
+      if (button.buttonPressed() == 1):
+         killAll()
+
+def readAnemometer():
+   while 1:
+      print anemometer.read()
+      led.whatColors(anemometer.read())
+
+def setup():
+   temp = thermometer.read_temp()
+   global temp_room
+   temp_room = temp
+   global tmin 
+   tmin = temp_room + 0.125
+   global tmax 
+   tmax = tmin + 0.2
+   print "Tmin is "  + str(tmin)
+   print "Tmax  is " + str(tmax) 
+
+def tooHot():   
+      while 1:
+        temp = thermometer.read_temp()
+        
+if (temp > tmin):
+            print "Tmin is" str(tmin)
+            print "Temp is too high"
+            if (temp < tmax):
+               button.buzzerOff()
+               global buzzed
+               buzzed = 0
+               print "Needs moar air"
+               dc = 85 - (50*(temp-tmin));
+            else:
+               print "Needs all of the air"
+               button.buzzerOn(buzzed)
+               global buzzed
+               buzzed = 1
+               dc = 0.1
+            motor.motorSpeed(dc)
+        else:
+            motor.motorSpeed(100)
+            button.buzzerOff()
+
+def killAll():
+   motor.motorSpeed(100)
+   motor.stopMotor()
+   GPIO.cleanup()
+   button.buzzerOff()
+   pool.terminate()
+   pool.join()
+
+def run():
+   try:
+      p = Process(target = readAnemometer)
+      p2 = Process(target = readButton)
+      p3 = Process(target = tooHot)
+      p.start()
+      p2.start()
+      p3.start()
+      p.join()
+      p2.join()
+      p3.join()
+   except KeyboardInterrupt:
+      pass
+   killAll()
+
+if __name__ == '__main__':
+   GPIO.setwarnings(False)
+   setup()
+   run()
+#   readAnemometer()
+   

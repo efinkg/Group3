@@ -27,7 +27,7 @@ def chooseColors(red, green, blue):
 
 def whatColors(anemometer):
    try:
-      if (anemometer == 1):
+      if (anemometer):
          print "Light up green"
          GPIO.output(red, False)
          GPIO.output(blue, False)
@@ -63,7 +63,7 @@ def whatColors(anemometer):
          GPIO.output(blue, True)
          GPIO.output(green, False)
          time.sleep(1)
-      elif (anemometer >= 7):
+      elif (anemometer == 7):
          print "Light it up!"
          GPIO.output(red, True)
          GPIO.output(blue, True)
